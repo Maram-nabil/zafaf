@@ -99,7 +99,8 @@ export default function CategoriesPage() {
                         return (
                             <div
                                 key={cat.name}
-                                className="bg-white rounded-2xl border border-gray-100 p-7 flex flex-col items-center text-center hover:shadow-md transition-shadow"
+                                onClick={() => navigate(`/vendors?category=${encodeURIComponent(cat.param)}`)}
+                                className="bg-white rounded-2xl border border-gray-100 p-7 flex flex-col items-center text-center active:shadow-md transition-shadow cursor-pointer"
                             >
                                 {/* Icon */}
                                 <div
@@ -128,13 +129,12 @@ export default function CategoriesPage() {
                                 </p>
 
                                 {/* CTA */}
-                                <button
-                                    onClick={() => navigate(`/vendors?category=${encodeURIComponent(cat.param)}`)}
-                                    className="mt-auto w-full py-2 rounded-xl text-sm font-medium border transition-colors hover:bg-[#c9a84c] hover:text-white"
+                                <span
+                                    className="mt-auto w-full py-3 rounded-xl text-sm font-medium border flex items-center justify-center min-h-[44px]"
                                     style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
                                 >
                                     Browse Vendors
-                                </button>
+                                </span>
                             </div>
                         )
                     })}
@@ -158,7 +158,7 @@ export default function CategoriesPage() {
                     </p>
                     <button
                         onClick={() => navigate('/vendors')}
-                        className="px-8 py-3 rounded-xl text-white text-sm font-medium hover:opacity-90 transition-opacity"
+                        className="px-8 py-3 rounded-xl text-white text-sm font-medium transition-opacity min-h-[44px]"
                         style={{ backgroundColor: '#c9a84c' }}
                     >
                         Browse All Vendors

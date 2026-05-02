@@ -226,7 +226,11 @@ export default function VendorsPage() {
                     {/* Vendors grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {VENDORS.map((v) => (
-                            <div key={v.id} className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+                            <Link
+                                key={v.id}
+                                to={`/vendors/${v.id}`}
+                                className="bg-white rounded-xl overflow-hidden border border-gray-100 active:shadow-md transition-shadow block"
+                            >
                                 <div className="h-44 relative flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
                                     <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d1d1" strokeWidth="1.2">
                                         <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -263,16 +267,15 @@ export default function VendorsPage() {
                                                 {v.price.toLocaleString()} EGP
                                             </span>
                                         </div>
-                                        <Link
-                                            to={`/vendors/${v.id}`}
-                                            className="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#c9a84c] hover:text-white hover:border-[#c9a84c]"
+                                        <span
+                                            className="text-xs px-3 py-2 rounded-lg border min-h-[44px] flex items-center"
                                             style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
                                         >
                                             View Profile
-                                        </Link>
+                                        </span>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
 
