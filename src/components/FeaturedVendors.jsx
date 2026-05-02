@@ -1,58 +1,12 @@
+import { Link } from 'react-router-dom'
+
 const vendors = [
-    {
-        name: 'Lens & Love Studio',
-        category: 'Photography',
-        rating: 4.9,
-        reviews: 128,
-        price: 8500,
-        badge: 'Featured',
-        badgeColor: '#c9a84c',
-    },
-    {
-        name: 'Nile Beats DJ',
-        category: 'DJ & Music',
-        rating: 4.8,
-        reviews: 94,
-        price: 5000,
-        badge: 'Top Rated',
-        badgeColor: '#2C2C2A',
-    },
-    {
-        name: 'Bloom Decor',
-        category: 'Venue & Decor',
-        rating: 4.7,
-        reviews: 76,
-        price: 12000,
-        badge: 'Featured',
-        badgeColor: '#c9a84c',
-    },
-    {
-        name: 'Royal Catering Co.',
-        category: 'Catering',
-        rating: 4.9,
-        reviews: 210,
-        price: 25000,
-        badge: 'Top Rated',
-        badgeColor: '#2C2C2A',
-    },
-    {
-        name: 'Glow Makeup Artists',
-        category: 'Makeup & Beauty',
-        rating: 4.8,
-        reviews: 155,
-        price: 3500,
-        badge: 'Featured',
-        badgeColor: '#c9a84c',
-    },
-    {
-        name: 'Cairo Frames',
-        category: 'Videography',
-        rating: 4.6,
-        reviews: 63,
-        price: 9000,
-        badge: 'Top Rated',
-        badgeColor: '#2C2C2A',
-    },
+    { id: 1, name: 'Lens & Love Studio', category: 'Photography', rating: 4.9, reviews: 128, price: 8500, badge: 'Featured', badgeColor: '#c9a84c' },
+    { id: 4, name: 'Nile Beats DJ', category: 'DJ & Music', rating: 4.8, reviews: 94, price: 5000, badge: 'Top Rated', badgeColor: '#2C2C2A' },
+    { id: 5, name: 'Bloom Decor', category: 'Venue & Decor', rating: 4.7, reviews: 76, price: 12000, badge: 'Featured', badgeColor: '#c9a84c' },
+    { id: 7, name: 'Royal Catering Co.', category: 'Catering', rating: 4.9, reviews: 210, price: 25000, badge: 'Top Rated', badgeColor: '#2C2C2A' },
+    { id: 8, name: 'Glow Makeup Artists', category: 'Makeup & Beauty', rating: 4.8, reviews: 155, price: 3500, badge: 'Featured', badgeColor: '#c9a84c' },
+    { id: 6, name: 'Cairo Frames', category: 'Videography', rating: 4.6, reviews: 63, price: 9000, badge: 'Top Rated', badgeColor: '#2C2C2A' },
 ]
 
 export default function FeaturedVendors() {
@@ -70,8 +24,12 @@ export default function FeaturedVendors() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {vendors.map((v) => (
-                        <div key={v.name} className="bg-white rounded-xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow cursor-pointer">
-                            {/* Uniform gray image placeholder */}
+                        <Link
+                            key={v.id}
+                            to={`/vendors/${v.id}`}
+                            className="bg-white rounded-xl overflow-hidden border border-gray-100 active:shadow-md transition-shadow block"
+                        >
+                            {/* Image placeholder */}
                             <div className="h-48 relative flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
                                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d1d1d1" strokeWidth="1.2">
                                     <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -94,11 +52,14 @@ export default function FeaturedVendors() {
                                 {/* Stars */}
                                 <div className="flex items-center gap-1 mb-3">
                                     {[1, 2, 3, 4, 5].map((s) => (
-                                        <svg key={s} width="12" height="12" viewBox="0 0 12 12" fill={s <= Math.round(v.rating) ? '#c9a84c' : '#e5e7eb'}>
+                                        <svg key={s} width="12" height="12" viewBox="0 0 12 12"
+                                            fill={s <= Math.round(v.rating) ? '#c9a84c' : '#e5e7eb'}>
                                             <path d="M6 1l1.39 2.82L10.5 4.27l-2.25 2.19.53 3.09L6 8.02 3.22 9.55l.53-3.09L1.5 4.27l3.11-.45L6 1z" />
                                         </svg>
                                     ))}
-                                    <span className="text-xs ml-1" style={{ color: '#888780' }}>{v.rating} ({v.reviews})</span>
+                                    <span className="text-xs ml-1" style={{ color: '#888780' }}>
+                                        {v.rating} ({v.reviews})
+                                    </span>
                                 </div>
 
                                 <div className="flex items-center justify-between">
@@ -108,12 +69,15 @@ export default function FeaturedVendors() {
                                             {v.price.toLocaleString()} EGP
                                         </p>
                                     </div>
-                                    <button className="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[#c9a84c] hover:text-white hover:border-[#c9a84c]" style={{ borderColor: '#c9a84c', color: '#c9a84c' }}>
+                                    <span
+                                        className="text-xs px-3 py-2 rounded-lg border min-h-[44px] flex items-center"
+                                        style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
+                                    >
                                         View Profile
-                                    </button>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>
