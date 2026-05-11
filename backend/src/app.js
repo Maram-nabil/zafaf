@@ -5,6 +5,8 @@ require('dotenv').config()
 
 const authRoutes = require('./modules/auth/auth.routes')
 const vendorRoutes = require('./modules/vendors/vendor.routes')
+const inquiryRoutes = require('./modules/inquiries/inquiry.routes')
+
 
 const app = express()
 
@@ -17,6 +19,7 @@ mongoose.connect(process.env.MONGODB_URI)
 
 app.use('/api/auth', authRoutes)
 app.use('/api/vendors', vendorRoutes)
+app.use('/api/inquiries', inquiryRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Zafaf API is running' })
