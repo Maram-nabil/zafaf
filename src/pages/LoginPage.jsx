@@ -4,14 +4,38 @@ import { Eye, EyeOff } from 'lucide-react'
 import ringLogo from '../assets/ring.jpg'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { api } from '../services/api'
 
 export default function LoginPage() {
     const navigate = useNavigate()
+
+    const [formData, setFormData] = useState({ email: '', password: '' })
     const [showPassword, setShowPassword] = useState(false)
-    const [form, setForm] = useState({ email: '', password: '' })
+    const [error, setError] = useState('')
+    const [loading, setLoading] = useState(false)
 
     const handleChange = (e) =>
-        setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+
+    const handleSubmit = async () => {
+        setLoading(true)
+        setError('')
+        try {
+            const data = await api.login(formData)
+            if (data.token) {
+                localStorage.setItem('token', data.token)
+                localStorage.setItem('user', JSON.stringify(data.user))
+                if (data.user.role === 'admin') navigate('/admin/dashboard')
+                else if (data.user.role === 'vendor') navigate('/vendor/dashboard')
+                else navigate('/')
+            } else {
+                setError(data.message || 'Login failed')
+            }
+        } catch (err) {
+            setError('Something went wrong')
+        }
+        setLoading(false)
+    }
 
     return (
         <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -23,10 +47,8 @@ export default function LoginPage() {
                     {/* Logo */}
                     <div className="flex flex-col items-center mb-7">
                         <img src={ringLogo} alt="Zafaf" className="h-14 w-14 object-contain mb-2" />
-                        <span
-                            className="font-serif text-2xl tracking-widest"
-                            style={{ color: '#2C2C2A', letterSpacing: '0.15em' }}
-                        >
+                        <span className="font-serif text-2xl tracking-widest"
+                            style={{ color: '#2C2C2A', letterSpacing: '0.15em' }}>
                             Zafaf
                         </span>
                     </div>
@@ -39,6 +61,13 @@ export default function LoginPage() {
                         Sign in to your account
                     </p>
 
+                    {/* Error */}
+                    {error && (
+                        <p className="text-red-500 text-sm text-center mb-4 px-2 py-2 rounded-lg bg-red-50">
+                            {error}
+                        </p>
+                    )}
+
                     {/* Form */}
                     <div className="flex flex-col gap-4">
                         <div className="flex flex-col gap-1.5">
@@ -46,7 +75,7 @@ export default function LoginPage() {
                             <input
                                 type="email"
                                 name="email"
-                                value={form.email}
+                                value={formData.email}
                                 onChange={handleChange}
                                 placeholder="you@example.com"
                                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#c9a84c] transition-colors"
@@ -60,7 +89,7 @@ export default function LoginPage() {
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     name="password"
-                                    value={form.password}
+                                    value={formData.password}
                                     onChange={handleChange}
                                     placeholder="••••••••"
                                     className="w-full px-4 py-2.5 pr-11 rounded-xl border border-gray-200 text-sm outline-none focus:border-[#c9a84c] transition-colors"
@@ -79,10 +108,12 @@ export default function LoginPage() {
                         </div>
 
                         <button
-                            className="w-full py-2.5 rounded-xl text-white text-sm font-medium hover:opacity-90 transition-opacity mt-1"
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="w-full py-2.5 rounded-xl text-white text-sm font-medium transition-opacity mt-1 disabled:opacity-60"
                             style={{ backgroundColor: '#c9a84c' }}
                         >
-                            Login
+                            {loading ? 'Logging in...' : 'Login'}
                         </button>
                     </div>
 
