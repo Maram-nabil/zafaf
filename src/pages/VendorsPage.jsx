@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { api } from '../services/api'
 
-const VENDORS = [
+const FALLBACK_VENDORS = [
     { id: 1, name: 'Lens & Love Studio', category: 'Photography', city: 'Cairo Maadi', rating: 4.9, reviews: 128, price: 8500, badge: 'Featured' },
     { id: 2, name: 'Golden Moments', category: 'Photography', city: 'Cairo Heliopolis', rating: 4.8, reviews: 94, price: 6000, badge: null },
     { id: 3, name: 'Nour Photography', category: 'Photography', city: 'Cairo Zamalek', rating: 4.7, reviews: 76, price: 12000, badge: 'Top Rated' },
@@ -56,6 +57,22 @@ function FilterCard({ title, children }) {
 }
 
 export default function VendorsPage() {
+    const [vendors, setVendors] = useState([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        api.getVendors()
+            .then((data) => {
+                setVendors(Array.isArray(data) ? data : FALLBACK_VENDORS)
+                setLoading(false)
+            })
+            .catch((err) => {
+                console.log(err)
+                setVendors(FALLBACK_VENDORS)
+                setLoading(false)
+            })
+    }, [])
+
     const [selectedCategories, setSelectedCategories] = useState([])
     const [selectedCities, setSelectedCities] = useState([])
     const [maxPrice, setMaxPrice] = useState(50000)
@@ -74,6 +91,18 @@ export default function VendorsPage() {
         setSelectedCities((prev) =>
             prev.includes(name) ? prev.filter((c) => c !== name) : [...prev, name]
         )
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex flex-col">
+                <Navbar />
+                <div className="flex-1 flex items-center justify-center">
+                    <p className="text-sm" style={{ color: '#888780' }}>Loading vendors...</p>
+                </div>
+                <Footer />
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -225,58 +254,66 @@ export default function VendorsPage() {
 
                     {/* Vendors grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {VENDORS.map((v) => (
-                            <Link
-                                key={v.id}
-                                to={`/vendors/${v.id}`}
-                                className="bg-white rounded-xl overflow-hidden border border-gray-100 active:shadow-md transition-shadow block"
-                            >
-                                <div className="h-44 relative flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
-                                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d1d1" strokeWidth="1.2">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" />
-                                        <circle cx="8.5" cy="8.5" r="1.5" />
-                                        <path d="M21 15l-5-5L5 21" />
-                                    </svg>
-                                    {v.badge && (
-                                        <span
-                                            className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full text-white"
-                                            style={{ backgroundColor: '#c9a84c' }}
-                                        >
-                                            {v.badge}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="p-4">
-                                    <h3 className="font-serif text-base font-semibold mb-0.5" style={{ color: '#2C2C2A' }}>
-                                        {v.name}
-                                    </h3>
-                                    <p className="text-xs mb-2" style={{ color: '#888780' }}>
-                                        {v.category} · {v.city}
-                                    </p>
-                                    <div className="flex items-center gap-1.5 mb-3">
-                                        <StarRow rating={v.rating} />
-                                        <span className="text-xs" style={{ color: '#888780' }}>
-                                            {v.rating} ({v.reviews})
-                                        </span>
+                        {vendors.map((v) => {
+                            const vendorId = v._id || v.id
+                            const vendorName = v.businessName || v.name
+                            const vendorRating = v.avgRating ?? v.rating
+                            const vendorReviews = v.reviewCount ?? v.reviews
+                            const vendorPrice = v.priceMin ?? v.price
+                            const vendorBadge = v.badge ?? null
+                            return (
+                                <Link
+                                    key={vendorId}
+                                    to={`/vendors/${vendorId}`}
+                                    className="bg-white rounded-xl overflow-hidden border border-gray-100 active:shadow-md transition-shadow block"
+                                >
+                                    <div className="h-44 relative flex items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+                                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#d1d1d1" strokeWidth="1.2">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                                            <circle cx="8.5" cy="8.5" r="1.5" />
+                                            <path d="M21 15l-5-5L5 21" />
+                                        </svg>
+                                        {vendorBadge && (
+                                            <span
+                                                className="absolute top-3 left-3 text-xs font-medium px-2.5 py-1 rounded-full text-white"
+                                                style={{ backgroundColor: '#c9a84c' }}
+                                            >
+                                                {vendorBadge}
+                                            </span>
+                                        )}
                                     </div>
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <span className="text-xs" style={{ color: '#888780' }}>from </span>
-                                            <span className="text-sm font-semibold" style={{ color: '#c9a84c' }}>
-                                                {v.price.toLocaleString()} EGP
+
+                                    <div className="p-4">
+                                        <h3 className="font-serif text-base font-semibold mb-0.5" style={{ color: '#2C2C2A' }}>
+                                            {vendorName}
+                                        </h3>
+                                        <p className="text-xs mb-2" style={{ color: '#888780' }}>
+                                            {v.category} · {v.city}
+                                        </p>
+                                        <div className="flex items-center gap-1.5 mb-3">
+                                            <StarRow rating={vendorRating} />
+                                            <span className="text-xs" style={{ color: '#888780' }}>
+                                                {vendorRating} ({vendorReviews})
                                             </span>
                                         </div>
-                                        <span
-                                            className="text-xs px-3 py-2 rounded-lg border min-h-[44px] flex items-center"
-                                            style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
-                                        >
-                                            View Profile
-                                        </span>
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <span className="text-xs" style={{ color: '#888780' }}>from </span>
+                                                <span className="text-sm font-semibold" style={{ color: '#c9a84c' }}>
+                                                    {vendorPrice?.toLocaleString() ?? '—'} EGP
+                                                </span>
+                                            </div>
+                                            <span
+                                                className="text-xs px-3 py-2 rounded-lg border min-h-[44px] flex items-center"
+                                                style={{ borderColor: '#c9a84c', color: '#c9a84c' }}
+                                            >
+                                                View Profile
+                                            </span>
+                                        </div>
                                     </div>
-                                </div>
-                            </Link>
-                        ))}
+                                </Link>
+                            )
+                        })}
                     </div>
 
                     {/* Pagination */}
