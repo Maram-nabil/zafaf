@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { MessageSquare, Heart, Star, Settings, LogOut } from 'lucide-react'
 import ringLogo from '../assets/ring.jpg'
 import InquiriesTab from '../components/user-dashboard/InquiriesTab'
 import SavedVendorsTab from '../components/user-dashboard/SavedVendorsTab'
 import MyReviewsTab from '../components/user-dashboard/MyReviewsTab'
 import SettingsTab from '../components/user-dashboard/SettingsTab'
+import { api } from '../services/api'
 
 const NAV_ITEMS = [
     { key: 'inquiries', label: 'My Inquiries', icon: MessageSquare },
@@ -14,15 +16,30 @@ const NAV_ITEMS = [
 ]
 
 export default function UserDashboard() {
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('inquiries')
+    const [inquiries, setInquiries] = useState([])
+    const user = JSON.parse(localStorage.getItem('user') || '{}')
+
+    useEffect(() => {
+        api.getMyInquiries()
+            .then(data => setInquiries(Array.isArray(data) ? data : []))
+            .catch(() => setInquiries([]))
+    }, [])
+
+    const logout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/')
+    }
 
     const renderTab = () => {
         switch (activeTab) {
-            case 'inquiries': return <InquiriesTab />
+            case 'inquiries': return <InquiriesTab inquiries={inquiries} />
             case 'saved': return <SavedVendorsTab />
             case 'reviews': return <MyReviewsTab />
             case 'settings': return <SettingsTab />
-            default: return <InquiriesTab />
+            default: return <InquiriesTab inquiries={inquiries} />
         }
     }
 
@@ -45,13 +62,13 @@ export default function UserDashboard() {
                 <div className="px-5 py-4 border-b border-gray-100">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center mb-2 text-white text-sm font-semibold"
                         style={{ backgroundColor: '#f9e4e4', color: '#c9a84c' }}>
-                        S
+                        {user.name ? user.name[0].toUpperCase() : 'U'}
                     </div>
                     <p className="text-sm font-semibold leading-tight" style={{ color: '#2C2C2A' }}>
-                        Sara & Ahmed
+                        {user.name || 'User'}
                     </p>
                     <p className="text-xs mt-0.5 truncate" style={{ color: '#888780' }}>
-                        sara@example.com
+                        {user.email || ''}
                     </p>
                 </div>
 
@@ -79,6 +96,7 @@ export default function UserDashboard() {
                 {/* Logout */}
                 <div className="px-3 pb-5">
                     <button
+                        onClick={logout}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left transition-colors hover:bg-red-50"
                         style={{ color: '#e57373' }}
                     >

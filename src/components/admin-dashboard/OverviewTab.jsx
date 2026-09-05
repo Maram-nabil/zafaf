@@ -1,30 +1,27 @@
-import { useState } from 'react'
 import { Store, Users, Clock, MessageSquare } from 'lucide-react'
+import { api } from '../../services/api'
 
-const STATS = [
-    { label: 'Total Vendors', value: '576', icon: Store, color: '#c9a84c' },
-    { label: 'Total Users', value: '1,240', icon: Users, color: '#7cb9a8' },
-    { label: 'Pending Approvals', value: '12', icon: Clock, color: '#e57373' },
-    { label: 'Total Inquiries', value: '3,847', icon: MessageSquare, color: '#c9a84c' },
-]
+export default function OverviewTab({ stats = {}, vendors = [], setVendors }) {
+    const statCards = [
+        { label: 'Total Vendors', value: stats.totalVendors ?? '—', icon: Store, color: '#c9a84c' },
+        { label: 'Total Users', value: stats.totalUsers ?? '—', icon: Users, color: '#7cb9a8' },
+        { label: 'Pending Approvals', value: stats.pendingVendors ?? '—', icon: Clock, color: '#e57373' },
+        { label: 'Total Inquiries', value: stats.totalInquiries ?? '—', icon: MessageSquare, color: '#c9a84c' },
+    ]
 
-const ACTIVITY = [
-    { text: 'New vendor registered: Cairo Frames', time: '2 min ago' },
-    { text: 'New inquiry submitted', time: '5 min ago' },
-    { text: 'Review posted on Lens & Love', time: '12 min ago' },
-    { text: 'New user registered', time: '1 hour ago' },
-]
+    const pending = vendors.filter(v => !v.isApproved && v.status !== 'rejected')
 
-const PENDING = [
-    { id: 1, name: 'Cairo Frames', category: 'Videography', city: 'Cairo', date: 'Today' },
-    { id: 2, name: 'Nile Flowers', category: 'Venue & Decor', city: 'Alexandria', date: 'Yesterday' },
-    { id: 3, name: 'Star Catering', category: 'Catering', city: 'Giza', date: '2 days ago' },
-]
+    const approve = (id) => {
+        api.approveVendor(id).then(() =>
+            setVendors(prev => prev.map(v => v._id === id ? { ...v, isApproved: true } : v))
+        ).catch(() => { })
+    }
 
-export default function OverviewTab() {
-    const [pending, setPending] = useState(PENDING)
-
-    const remove = (id) => setPending((p) => p.filter((r) => r.id !== id))
+    const reject = (id) => {
+        api.rejectVendor(id).then(() =>
+            setVendors(prev => prev.map(v => v._id === id ? { ...v, status: 'rejected' } : v))
+        ).catch(() => { })
+    }
 
     return (
         <div className="px-8 py-8">
@@ -35,7 +32,7 @@ export default function OverviewTab() {
 
             {/* Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                {STATS.map(({ label, value, icon: Icon, color }) => (
+                {statCards.map(({ label, value, icon: Icon, color }) => (
                     <div key={label} className="bg-white rounded-xl border border-gray-100 p-5">
                         <div className="flex items-center justify-between mb-3">
                             <p className="text-xs font-medium" style={{ color: '#888780' }}>{label}</p>
@@ -49,71 +46,52 @@ export default function OverviewTab() {
                 ))}
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-                {/* Activity feed */}
-                <div className="bg-white rounded-xl border border-gray-100 p-5">
-                    <h2 className="text-sm font-semibold mb-4" style={{ color: '#2C2C2A' }}>Recent Activity</h2>
-                    <div className="flex flex-col gap-3">
-                        {ACTIVITY.map((a, i) => (
-                            <div key={i} className="flex items-start gap-3">
-                                <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: '#c9a84c' }} />
-                                <div>
-                                    <p className="text-sm" style={{ color: '#2C2C2A' }}>{a.text}</p>
-                                    <p className="text-xs mt-0.5" style={{ color: '#888780' }}>{a.time}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+            {/* Pending approvals */}
+            <div className="bg-white rounded-xl border border-gray-100">
+                <div className="px-5 py-4 border-b border-gray-100">
+                    <h2 className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>Pending Vendor Approvals</h2>
                 </div>
-
-                {/* Pending approvals */}
-                <div className="lg:col-span-2 bg-white rounded-xl border border-gray-100">
-                    <div className="px-5 py-4 border-b border-gray-100">
-                        <h2 className="text-sm font-semibold" style={{ color: '#2C2C2A' }}>Pending Vendor Approvals</h2>
-                    </div>
-                    {pending.length === 0 ? (
-                        <p className="px-5 py-8 text-sm text-center" style={{ color: '#888780' }}>
-                            No pending approvals.
-                        </p>
-                    ) : (
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr className="border-b border-gray-50">
-                                        {['Business Name', 'Category', 'City', 'Date', 'Actions'].map((h) => (
-                                            <th key={h} className="text-left px-5 py-3 text-xs font-medium"
-                                                style={{ color: '#888780' }}>{h}</th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {pending.map((row, i) => (
-                                        <tr key={row.id} className={i < pending.length - 1 ? 'border-b border-gray-50' : ''}>
-                                            <td className="px-5 py-3.5 font-medium" style={{ color: '#2C2C2A' }}>{row.name}</td>
-                                            <td className="px-5 py-3.5" style={{ color: '#888780' }}>{row.category}</td>
-                                            <td className="px-5 py-3.5" style={{ color: '#888780' }}>{row.city}</td>
-                                            <td className="px-5 py-3.5" style={{ color: '#888780' }}>{row.date}</td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => remove(row.id)}
-                                                        className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-green-50"
-                                                        style={{ borderColor: '#4caf50', color: '#4caf50' }}>
-                                                        Approve
-                                                    </button>
-                                                    <button onClick={() => remove(row.id)}
-                                                        className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-red-50"
-                                                        style={{ borderColor: '#e57373', color: '#e57373' }}>
-                                                        Reject
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
+                {pending.length === 0 ? (
+                    <p className="px-5 py-8 text-sm text-center" style={{ color: '#888780' }}>
+                        No pending approvals.
+                    </p>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                            <thead>
+                                <tr className="border-b border-gray-50">
+                                    {['Business Name', 'Category', 'City', 'Actions'].map((h) => (
+                                        <th key={h} className="text-left px-5 py-3 text-xs font-medium"
+                                            style={{ color: '#888780' }}>{h}</th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </div>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {pending.map((row, i) => (
+                                    <tr key={row._id} className={i < pending.length - 1 ? 'border-b border-gray-50' : ''}>
+                                        <td className="px-5 py-3.5 font-medium" style={{ color: '#2C2C2A' }}>{row.businessName}</td>
+                                        <td className="px-5 py-3.5" style={{ color: '#888780' }}>{row.category}</td>
+                                        <td className="px-5 py-3.5" style={{ color: '#888780' }}>{row.city}</td>
+                                        <td className="px-5 py-3.5">
+                                            <div className="flex gap-2">
+                                                <button onClick={() => approve(row._id)}
+                                                    className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-green-50"
+                                                    style={{ borderColor: '#4caf50', color: '#4caf50' }}>
+                                                    Approve
+                                                </button>
+                                                <button onClick={() => reject(row._id)}
+                                                    className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-red-50"
+                                                    style={{ borderColor: '#e57373', color: '#e57373' }}>
+                                                    Reject
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </div>
         </div>
     )

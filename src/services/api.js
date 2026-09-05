@@ -59,4 +59,46 @@ export const api = {
   }).then(r => r.json()),
 
   getVendorReviews: (vendorId) => fetch(`${BASE_URL}/reviews/${vendorId}`).then(r => r.json()),
+
+  // Vendor dashboard
+  getMyVendor: () => fetch(`${BASE_URL}/vendors/my`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  getReceivedInquiries: () => fetch(`${BASE_URL}/inquiries/received`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  updateInquiryStatus: (id, status) => fetch(`${BASE_URL}/inquiries/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
+    body: JSON.stringify({ status })
+  }).then(r => r.json()),
+
+  // Admin
+  getAdminStats: () => fetch(`${BASE_URL}/admin/stats`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  getAdminVendors: () => fetch(`${BASE_URL}/admin/vendors`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  getAdminUsers: () => fetch(`${BASE_URL}/admin/users`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  getAdminInquiries: () => fetch(`${BASE_URL}/admin/inquiries`, {
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  approveVendor: (id) => fetch(`${BASE_URL}/admin/vendors/${id}/approve`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
+
+  rejectVendor: (id) => fetch(`${BASE_URL}/admin/vendors/${id}/reject`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${getToken()}` }
+  }).then(r => r.json()),
 }

@@ -1,30 +1,18 @@
 import { useState } from 'react'
 
-const ALL_INQUIRIES = [
-    { id: 1, couple: 'Sarah & Ahmed', date: 'June 15, 2026', message: 'We loved your work and would love to discuss packages...', status: 'Pending' },
-    { id: 2, couple: 'Nour & Karim', date: 'July 3, 2026', message: 'Are you available for our date? We have a garden wedding.', status: 'Confirmed' },
-    { id: 3, couple: 'Mona & Tamer', date: 'Aug 20, 2026', message: 'What packages do you offer for full-day shoots?', status: 'Pending' },
-    { id: 4, couple: 'Dina & Omar', date: 'Sept 1, 2026', message: 'Can you travel to Alexandria for our wedding?', status: 'Rejected' },
-    { id: 5, couple: 'Layla & Amr', date: 'Oct 10, 2026', message: 'Do you offer engagement sessions as well?', status: 'Pending' },
-    { id: 6, couple: 'Noran & Sherif', date: 'Nov 5, 2026', message: 'We saw your portfolio and absolutely love your style!', status: 'Confirmed' },
-]
-
 const STATUS_STYLES = {
-    Pending: { bg: '#fdf6e7', color: '#c9a84c' },
-    Confirmed: { bg: '#e8f5e9', color: '#4caf50' },
-    Rejected: { bg: '#fdecea', color: '#e57373' },
+    pending: { bg: '#fdf6e7', color: '#c9a84c', label: 'Pending' },
+    confirmed: { bg: '#e8f5e9', color: '#4caf50', label: 'Confirmed' },
+    rejected: { bg: '#fdecea', color: '#e57373', label: 'Rejected' },
 }
 
-const FILTERS = ['All', 'Pending', 'Confirmed', 'Rejected']
+const FILTERS = ['All', 'pending', 'confirmed', 'rejected']
+const FILTER_LABELS = { All: 'All', pending: 'Pending', confirmed: 'Confirmed', rejected: 'Rejected' }
 
-export default function InquiriesTab() {
+export default function InquiriesTab({ inquiries = [], updateStatus }) {
     const [filter, setFilter] = useState('All')
-    const [inquiries, setInquiries] = useState(ALL_INQUIRIES)
 
     const visible = filter === 'All' ? inquiries : inquiries.filter((i) => i.status === filter)
-
-    const updateStatus = (id, status) =>
-        setInquiries((prev) => prev.map((i) => i.id === id ? { ...i, status } : i))
 
     return (
         <div className="px-8 py-8">
@@ -43,7 +31,7 @@ export default function InquiriesTab() {
                             color: filter === f ? 'white' : '#888780',
                             borderColor: filter === f ? '#c9a84c' : '#e5e7eb',
                         }}>
-                        {f}
+                        {FILTER_LABELS[f]}
                     </button>
                 ))}
             </div>
@@ -65,27 +53,33 @@ export default function InquiriesTab() {
                                 </td>
                             </tr>
                         ) : visible.map((row, i) => {
-                            const s = STATUS_STYLES[row.status]
+                            const s = STATUS_STYLES[row.status] ?? STATUS_STYLES.pending
                             return (
-                                <tr key={row.id} className={i < visible.length - 1 ? 'border-b border-gray-50' : ''}>
-                                    <td className="px-5 py-3.5 font-medium whitespace-nowrap" style={{ color: '#2C2C2A' }}>{row.couple}</td>
-                                    <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: '#888780' }}>{row.date}</td>
-                                    <td className="px-5 py-3.5 max-w-[220px] truncate" style={{ color: '#888780' }}>{row.message}</td>
+                                <tr key={row._id} className={i < visible.length - 1 ? 'border-b border-gray-50' : ''}>
+                                    <td className="px-5 py-3.5 font-medium whitespace-nowrap" style={{ color: '#2C2C2A' }}>
+                                        {row.userId?.name || 'Couple'}
+                                    </td>
+                                    <td className="px-5 py-3.5 whitespace-nowrap" style={{ color: '#888780' }}>
+                                        {row.eventDate ? new Date(row.eventDate).toLocaleDateString() : '—'}
+                                    </td>
+                                    <td className="px-5 py-3.5 max-w-[220px] truncate" style={{ color: '#888780' }}>
+                                        {row.message}
+                                    </td>
                                     <td className="px-5 py-3.5">
                                         <span className="text-xs font-medium px-2.5 py-1 rounded-full"
                                             style={{ backgroundColor: s.bg, color: s.color }}>
-                                            {row.status}
+                                            {s.label}
                                         </span>
                                     </td>
                                     <td className="px-5 py-3.5">
-                                        {row.status === 'Pending' ? (
+                                        {row.status === 'pending' ? (
                                             <div className="flex gap-2">
-                                                <button onClick={() => updateStatus(row.id, 'Confirmed')}
+                                                <button onClick={() => updateStatus(row._id, 'confirmed')}
                                                     className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-green-50"
                                                     style={{ borderColor: '#4caf50', color: '#4caf50' }}>
                                                     Confirm
                                                 </button>
-                                                <button onClick={() => updateStatus(row.id, 'Rejected')}
+                                                <button onClick={() => updateStatus(row._id, 'rejected')}
                                                     className="text-xs px-3 py-1 rounded-lg border transition-colors hover:bg-red-50"
                                                     style={{ borderColor: '#e57373', color: '#e57373' }}>
                                                     Reject

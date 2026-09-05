@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { LayoutDashboard, Store, Users, MessageSquare, Grid, Settings, LogOut } from 'lucide-react'
 import ringLogo from '../assets/ring.jpg'
 import OverviewTab from '../components/admin-dashboard/OverviewTab'
@@ -7,6 +8,7 @@ import UsersTab from '../components/admin-dashboard/UsersTab'
 import InquiriesTab from '../components/admin-dashboard/InquiriesTab'
 import CategoriesTab from '../components/admin-dashboard/CategoriesTab'
 import SettingsTab from '../components/admin-dashboard/SettingsTab'
+import { api } from '../services/api'
 
 const NAV_ITEMS = [
     { key: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -18,17 +20,33 @@ const NAV_ITEMS = [
 ]
 
 export default function AdminDashboard() {
+    const navigate = useNavigate()
     const [activeTab, setActiveTab] = useState('overview')
+    const [stats, setStats] = useState({})
+    const [vendors, setVendors] = useState([])
+    const [users, setUsers] = useState([])
+
+    useEffect(() => {
+        api.getAdminStats().then(data => setStats(data)).catch(() => { })
+        api.getAdminVendors().then(data => setVendors(Array.isArray(data) ? data : [])).catch(() => { })
+        api.getAdminUsers().then(data => setUsers(Array.isArray(data) ? data : [])).catch(() => { })
+    }, [])
+
+    const logout = () => {
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        navigate('/')
+    }
 
     const renderTab = () => {
         switch (activeTab) {
-            case 'overview': return <OverviewTab />
-            case 'vendors': return <VendorsTab />
-            case 'users': return <UsersTab />
+            case 'overview': return <OverviewTab stats={stats} vendors={vendors} setVendors={setVendors} />
+            case 'vendors': return <VendorsTab vendors={vendors} setVendors={setVendors} />
+            case 'users': return <UsersTab users={users} setUsers={setUsers} />
             case 'inquiries': return <InquiriesTab />
             case 'categories': return <CategoriesTab />
             case 'settings': return <SettingsTab />
-            default: return <OverviewTab />
+            default: return <OverviewTab stats={stats} vendors={vendors} setVendors={setVendors} />
         }
     }
 
@@ -75,7 +93,7 @@ export default function AdminDashboard() {
 
                 {/* Logout */}
                 <div className="px-3 pb-5">
-                    <button className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left transition-colors hover:bg-red-50"
+                    <button onClick={logout} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left transition-colors hover:bg-red-50"
                         style={{ color: '#e57373' }}>
                         <LogOut size={17} strokeWidth={1.5} />
                         Logout
