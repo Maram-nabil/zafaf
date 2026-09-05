@@ -101,4 +101,12 @@ export const api = {
     method: 'PUT',
     headers: { Authorization: `Bearer ${getToken()}` }
   }).then(r => r.json()),
+
+
+  //Cloudinary
+  uploadImages: (formData) => fetch(`${BASE_URL}/vendors/upload`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${getToken()}` },
+  body: formData
+}).then(r => r.json()),
 }
